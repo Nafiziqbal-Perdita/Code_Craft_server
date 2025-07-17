@@ -8,7 +8,7 @@ A backend service for generating, managing, and delivering code artifacts using 
 
 - **LLM-Powered Code Generation:** Uses state-of-the-art LLMs to generate code, project files, and development artifacts on demand.
 - **RESTful API:** Exposes endpoints for project type detection and interactive chat/code generation.
-- **Artifact Format:** Returns structured responses (with `<boltArtifact>` and `<boltAction>` tags) for easy parsing and project bootstrapping.
+
 - **React & Node.js Support:** Can generate both React (frontend) and Node.js (backend) project templates.
 - **Configurable & Extensible:** Easily adapt prompts, models, and project templates.
 
