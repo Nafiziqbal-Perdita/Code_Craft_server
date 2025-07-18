@@ -14,15 +14,27 @@ dotenv.config();
 
 // Initialize Express app
 const app = express();
-const port = 3001; 
+const port = 3001;
 
 // ✅ Enable CORS for all origins (or specify allowed origin)
+const allowedOrigins = [
+  // "http://localhost:5173",
+  "https://code-craft-ui.vercel.app",
+];
+
 app.use(
   cors({
-    // origin: "http://localhost:3000", // allow your frontend
-    origin: "http://localhost:5173", // allow your frontend
-    methods: ["GET", "POST"], // allow these methods
-    credentials: true, // if you're using cookies or auth headers
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST"],
+    credentials: true,
   })
 );
 
@@ -94,16 +106,13 @@ app.post("/template", async (req, res) => {
   res.status(403).json({ message: "You cant access this" });
 });
 
-
-
 app.post("/chat", async (req, res) => {
-
   console.log(`i got a work...\n\n let me do that`);
   try {
     const messages = req.body.messages;
-    
+
     // console.log("Received messages:", messages);
-    
+
     // Initialize the language model with configuration
     const llm = new ChatGroq({
       model: "llama-3.3-70b-versatile",
@@ -114,18 +123,20 @@ app.post("/chat", async (req, res) => {
 
     // Create messages array starting with system prompt
     // Get the system prompt and escape any curly braces to avoid template parsing errors
-    const systemPrompt = getSystemPrompt().replace(/\{/g, '{{').replace(/\}/g, '}}');
-    
+    const systemPrompt = getSystemPrompt()
+      .replace(/\{/g, "{{")
+      .replace(/\}/g, "}}");
+
     // Build the full messages array with system prompt + user messages
     // Escape curly braces in all message content to avoid template parsing errors
     const allMessages = [
       ["system", systemPrompt],
-      ...messages.map(msg => [
-        msg.role || "user", 
-        (msg.content || "").replace(/\{/g, '{{').replace(/\}/g, '}}')
-      ])
+      ...messages.map((msg) => [
+        msg.role || "user",
+        (msg.content || "").replace(/\{/g, "{{").replace(/\}/g, "}}"),
+      ]),
     ];
-    
+
     const promtTemplate = ChatPromptTemplate.fromMessages(allMessages);
 
     // Format and invoke the LLM (no variables to format since we're using direct messages)
@@ -136,20 +147,16 @@ app.post("/chat", async (req, res) => {
     console.log("Chat response:", response.content);
 
     res.json({
-      response: response.content
+      response: response.content,
     });
   } catch (error) {
     console.error("Chat endpoint error:", error);
-    res.status(500).json({ 
-      error: "Internal server error", 
-      message: error.message 
+    res.status(500).json({
+      error: "Internal server error",
+      message: error.message,
     });
   }
 });
-
-
-
-
 
 // GET / endpoint: Simple health check route
 app.get("/", (req, res) => {

@@ -42,7 +42,7 @@ A backend service for generating, managing, and delivering code artifacts using 
 ### Running the Server
 
 ```sh
-npm run dev
+npm start
 ```
 
 The server will start on [http://localhost:3000](http://localhost:3000).
